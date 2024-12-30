@@ -1,6 +1,6 @@
 # CG Kompas
 An app for API calls and DB maintenance
-
+<br>
 ## Installation:
 ### 0. Choose your project folder in cmd
    ```sh
@@ -14,6 +14,7 @@ An app for API calls and DB maintenance
   <a href="https://www.docker.com/">Download</a>
 ### 3. Complete the Docker installation and register\login
 
+<br>
 ## Running the server
 ### 0. Go into your folder in cmd
    ```sh
@@ -28,6 +29,7 @@ An app for API calls and DB maintenance
    docker-compose up
    ```
 
+<br>
 ## Quitting
 ### 1. Stop the Django server
    Use <b>Ctrl + C</b> in cmd where the containers are run
