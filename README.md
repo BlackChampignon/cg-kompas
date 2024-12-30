@@ -1,5 +1,5 @@
 # CG Kompas
-## An app for API calls and DB maintenance
+An app for API calls and DB maintenance
 
 ## Installation:
 ### 0. Choose your project folder in cmd
