@@ -37,3 +37,21 @@ An app for API calls and DB maintenance
   ```sh
    docker-compose down
    ```
+<br>
+
+## Usage
+### For API testing:
+1. http://localhost:8000/api/  → Json array of all Events
+2. http://localhost:8000/api/1/   → Any number instead of 1 to get specific event det's
+### DB testing (work in progress)
+http://localhost:8000/
+Working actions:
+1. User register
+2. User login
+3. User delete
+4. All categories
+5. Add category
+6. Modify a category
+7. List of all events (work in progress)
+8. Add an event
+9. Delete an event
