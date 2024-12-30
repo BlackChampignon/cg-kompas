@@ -1,0 +1,63 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<h2>{{ event.name }}</h2>
+<p><strong>Description:</strong> {{ event.description }}</p>
+<p><strong>Location:</strong> {{ event.precise_place }}</p>
+<p><strong>Date:</strong> {{ event.date }}</p>
+<p><strong>Duration:</strong> {{ event.duration }}</p>
+<p><strong>Categories:</strong>
+    {% for category in event.categories.all %}
+        {{ category.type }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</p>
+<p><strong>Price:</strong> {{ event.price }}</p>
+
+<h3>Likes</h3>
+<p>{{ event.liked_by.count }} people like this event.</p>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'like_event' event.id %}">
+        {% csrf_token %}
+        <button type="submit">
+            {% if has_liked %}
+                Unlike
+            {% else %}
+                Like
+            {% endif %}
+        </button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to like this event.</p>
+{% endif %}
+
+
+
+<h3>Comments</h3>
+<ul>
+    {% for comment in comments %}
+        <li>
+            <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+            {% if comment.user == user %}
+                <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <p>No comments yet. Be the first to comment!</p>
+    {% endfor %}
+</ul>
+
+{% if user.is_authenticated %}
+    <h4>Add a Comment</h4>
+    <form method="post" action="{% url 'add_comment' event.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
+{% endif %}
+
+{% if user.is_authenticated %}
+    <a href="{% url 'delete_event' event.id %}" style="color: red;">Delete Event</a>
+{% endif %}
+{% endblock %}

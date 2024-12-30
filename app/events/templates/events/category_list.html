@@ -1,0 +1,16 @@
+{% extends 'events/base.html' %}
+{% block content %}
+    <h2>Categories</h2>
+    <a href="{% url 'add_category' %}" class="btn btn-primary mb-3">Add New Category</a>
+    <ul class="list-group">
+        {% for category in categories %}
+            <li class="list-group-item">
+                {{ category.name }}
+                <a href="{% url 'modify_category' category.id %}" class="btn btn-sm btn-warning float-right ml-2">Modify</a>
+                <a href="{% url 'delete_category' category.id %}" class="btn btn-sm btn-danger float-right">Delete</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No categories available.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
