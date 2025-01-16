@@ -3,7 +3,23 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    # Add custom related_name attributes to avoid clashes
+    REGISTRATION_CHOICES = [
+        ('email', 'Email and Password'),
+        ('google', 'Google'),
+        ('facebook', 'Facebook'),
+    ]
+    registration_method = models.CharField(
+        max_length=10,
+        choices=REGISTRATION_CHOICES,
+        default='email',
+        help_text='Specifies how the user registered.',
+    )
+
+    is_email_password_enabled = models.BooleanField(
+        default=True,
+        help_text="Indicates whether the user can log in using email and password.",
+    )
+
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='events_user_set',  # Avoids clash with auth.User.groups
@@ -18,10 +34,14 @@ class User(AbstractUser):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions',
     )
+
     username = models.CharField(
         max_length=150,
-        unique=True,
-        default="default_username"  # Temporary default value
+        unique=False,
+    )
+    email = models.CharField(
+        max_length=150,
+        unique=True
     )
 
 

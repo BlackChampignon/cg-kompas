@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,15 +33,24 @@ ALLOWED_HOSTS = [*map(str.strip, os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',
 # Application definition
 
 INSTALLED_APPS = [
+    # Primary apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # the main app :)
     'events',
+
+    # Some rest shiii ↓
     'rest_framework',
+    'rest_framework_simplejwt',
+    # 'rest_framework_social_oauth2',  # Required for google and facebook OAuth login :o
+    'rest_framework.authtoken',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,6 +63,33 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+# rest config
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Nothing here so to specify where to use tokens
+    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',  # So it WORKS
+    ),
+}
+
+# token desc
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(weeks=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': False,
+}
+
+# google shi
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<your-google-client-id>'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<your-google-client-secret>'
+
+# facebook shi
+SOCIAL_AUTH_FACEBOOK_KEY = '<your-facebook-app-id>'
+SOCIAL_AUTH_FACEBOOK_SECRET = '<your-facebook-app-secret>'
 
 TEMPLATES = [
     {
@@ -88,6 +125,7 @@ DATABASES = {
 
 }
 
+# AUTH_USER_MODEL = 'events.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -113,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Podgorica'
 
 USE_I18N = True
 

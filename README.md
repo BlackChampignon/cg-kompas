@@ -43,15 +43,40 @@ An app for API calls and DB maintenance
 ### For API testing:
 1. http://localhost:8000/api/  → Json array of all Events
 2. http://localhost:8000/api/1/   → Any number instead of 1 to get specific event det's
-### DB testing (work in progress)
-http://localhost:8000/
-Working actions:
-1. User register
-2. User login
-3. User delete
-4. All categories
-5. Add category
-6. Modify a category
-7. List of all events (work in progress)
-8. Add an event
-9. Delete an event
+### Login and Registration:
+1. Registration is done by sending a POST request to the following url
+```http
+    http://localhost:8000/api/register/
+```
+with the following mandatory data in json
+```json
+{
+    "email": "user1@example.com",
+    "password": "user123"
+}
+```
+
+2. Login is performed by sending a POST request to the following url
+```http
+    http://localhost:8000/api/login/
+```
+with the following mandatory data in json
+```json
+{
+    "email": "user1@example.com",
+    "password": "user123"
+}
+```
+Afterwards you get access_token and refresh_token (also in json)
+### Getting the events with authentification token
+Write a GET request to the following url
+```http
+    http://localhost:8000/api/aut/1/
+```
+containing the following json data:
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+Where instead of <access_token> you use the token which was received upon login 
