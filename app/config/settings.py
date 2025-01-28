@@ -17,6 +17,9 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# For storing images for Events
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -29,6 +32,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = [*map(str.strip, os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(','))]
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS',
+]
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+]
 
 # Application definition
 
@@ -47,6 +60,7 @@ INSTALLED_APPS = [
     # Some rest shiii ↓
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
     # 'rest_framework_social_oauth2',  # Required for google and facebook OAuth login :o
     'rest_framework.authtoken',
 ]
@@ -55,6 +69,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -82,6 +97,10 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # google shi
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<your-google-client-id>'
@@ -125,7 +144,7 @@ DATABASES = {
 
 }
 
-# AUTH_USER_MODEL = 'events.User'
+AUTH_USER_MODEL = 'events.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

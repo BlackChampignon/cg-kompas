@@ -21,18 +21,49 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    categories = CategorySerializer(many=True)  # Nested representation of categories
+    first_category = serializers.SerializerMethodField()
+    latitude = serializers.SerializerMethodField()
+    longitude = serializers.SerializerMethodField()
+    # categories = CategorySerializer(many=True)  # Nested representation of categories
     liked_by = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
     )  # Users who liked this event
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Event
         fields = [
-            'id', 'name', 'description', 'region', 'precise_place', 'date',
-            'repetition', 'duration', 'categories', 'price', 'liked_by'
+            'id', 'name', 'description', 'region', 'precise_place',
+            'latitude', 'longitude', 'date', 'repetition', 'duration',
+            'first_category', 'price', 'liked_by', 'image', 'theme_color'
         ]
+
+    def get_first_category(self, obj):
+        # Return the first category, or None if no categories exist
+        first_category = obj.categories.first()
+        return {
+            "id": first_category.id,
+            "name": first_category.name
+        } if first_category else None
+
+    def get_latitude(self, obj):
+        # Extract latitude from precise_place
+        if obj.precise_place:
+            try:
+                return float(obj.precise_place.split(",")[0].strip())
+            except (ValueError, IndexError):
+                return None
+        return None
+
+    def get_longitude(self, obj):
+        # Extract longitude from precise_place
+        if obj.precise_place:
+            try:
+                return float(obj.precise_place.split(",")[1].strip())
+            except (ValueError, IndexError):
+                return None
+        return None
 
 
 class CommentSerializer(serializers.ModelSerializer):

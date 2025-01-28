@@ -43,6 +43,8 @@ class User(AbstractUser):
         max_length=150,
         unique=True
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
 
 class Category(models.Model):
@@ -62,6 +64,13 @@ class Event(models.Model):
     duration = models.CharField(max_length=100, null=True, blank=True)
     categories = models.ManyToManyField(Category, related_name="events")
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    image = models.ImageField(upload_to='event_images/', null=True, blank=True)
+
+    theme_color = models.CharField(
+        max_length=10,  # Format: #0xAABBCCDD (argb, flutter format)
+        default='0xFFFFFFFF'
+    )
 
     # Many-to-Many relationship for likes
     liked_by = models.ManyToManyField('User', related_name='liked_events', blank=True)

@@ -5,6 +5,10 @@ from .models import Event, Comment, User, Category
 
 from django.apps import apps
 
+# for login
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import make_password
+
 # These down are for API
 from rest_framework.response import Response
 from rest_framework import status
@@ -125,8 +129,8 @@ class LoginAPI(APIView):
             return Response({"error": "Invalid email "}, status=status.HTTP_401_UNAUTHORIZED)
         print(user.email)
         print(email)
-        # if not authenticate(request, email=email, password=password):
-        if (email != user.email) or (password != user.password):
+        if not authenticate(request, email=email, password=password):
+        #if (email != user.email) or (password != user.password):
             return Response({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
         refresh = RefreshToken.for_user(user)
         return Response({

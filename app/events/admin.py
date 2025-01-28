@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from .models import User, Category, Event, Comment
+from django.utils.safestring import mark_safe
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -17,7 +18,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('name', 'region', 'date', 'price', 'get_categories')
+    list_display = ('name', 'region', 'date', 'price', 'get_categories', 'event_image_preview')
     search_fields = ('name', 'region', 'categories__name')
     list_filter = ('date', 'price', 'categories')
 
@@ -25,6 +26,14 @@ class EventAdmin(admin.ModelAdmin):
         return ", ".join([category.name for category in obj.categories.all()])
 
     get_categories.short_description = 'Categories'  # Name to column
+
+    def event_image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="50" height="50" />')
+        return 'No Image'
+
+    event_image_preview.short_description = 'Event Image Preview'
+    event_image_preview.allow_tags = True  # Allow HTML tags for the image preview
 
 
 class CommentAdmin(admin.ModelAdmin):
