@@ -23,6 +23,7 @@ from google.oauth2 import id_token
 import requests as http_requests
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import get_object_or_404
 
 
 GOOGLE_ID = "<YOUR_GOOGLE_CLIENT_ID>"
@@ -37,55 +38,17 @@ class Socials(APIView):
         token = request.data.get('token')
         email = request.data.get('email')
 
-        if provider == 'google':
-            return self.handle_google_token(token)
-        elif provider == 'facebook':
-            return self.handle_facebook_token(token, request)
-        elif provider == 'email':
+        if provider == 'email':
             return self.handle_social_login(email, provider)
         else:
             return Response({"error": "Invalid provider"}, status=status.HTTP_400_BAD_REQUEST)
-
-    def handle_google_token(self, token):
-        try:
-            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_ID)
-            email = idinfo.get('email')
-
-            if not email:
-                return Response({"error": "Email not found in Google token"}, status=status.HTTP_400_BAD_REQUEST)
-
-            return self.handle_social_login(email, 'google')
-
-        except ValueError:
-            return Response({"error": "Invalid Google token"}, status=status.HTTP_400_BAD_REQUEST)
-
-    def handle_facebook_token(self, token, request):
-        try:
-            app_id = FACEBOOK_ID
-            app_secret = FACEBOOK_SECRET
-            url = f"https://graph.facebook.com/debug_token?input_token={token}&access_token={app_id}|{app_secret}"
-            resp = http_requests.get(url).json()
-
-            if not resp.get('data', {}).get('is_valid'):
-                return Response({"error": "Invalid Facebook token"}, status=status.HTTP_400_BAD_REQUEST)
-
-            email = request.data.get('email')  # !Check if facebook returns the email
-
-            if not email:
-                return Response({"error": "Email not found in Facebook token"}, status=status.HTTP_400_BAD_REQUEST)
-
-            return self.handle_social_login(email, 'facebook')
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def handle_social_login(self, email, provider):
         User = get_user_model()
         user = User.objects.filter(email=email).first()
 
         if not user:
-            # Modify dat (create a user)
-            pass
+            return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
         # gen JWT tokens for the user and return dem
         refresh = RefreshToken.for_user(user)
@@ -141,11 +104,11 @@ class LoginAPI(APIView):
 
 
 # The following are API calls
-@api_view(['GET'])
-def api_events(request):
-    event = Event.objects.all()
-    serializer = EventSerializer(event, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def api_events(request):
+#     event = Event.objects.all()
+#     serializer = EventSerializer(event, many=True)
+#     return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -158,35 +121,58 @@ def api_get_event(request, event_id):
         return Response({"error": "Event instance not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
-# Here we test!
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def api_aut_event(request, event_id):
-    try:
-        event = Event.objects.get(id=event_id)
-        serializer = EventSerializer(event)
-        return Response(serializer.data)
-    except Event.DoesNotExist:
-        return Response({"error": "Event instance not found."}, status=status.HTTP_404_NOT_FOUND)
+def api_events(request):
+    events = Event.objects.all()
+    serializer = EventSerializer(events, many=True, context={'request': request})
+    return Response(serializer.data)
 
 
-# These down don't work aahhhh hell
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def change_username(request):
+    uname = request.data.get('username')
+    if not uname:
+        return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    request.user.username = uname
+    request.user.save()
+
+    return Response({"message": "Username updated successfully", "username": uname}, status=status.HTTP_200_OK)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
 
 
-class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def like(request):
+    event_id = int(request.data.get('event_id'))
+
+    if not event_id:
+        return Response({'error': 'Event ID is required'}, status=400)
+
+    event = get_object_or_404(Event, id=event_id)
+    user = request.user
+
+    if user in event.liked_by.all():
+        event.liked_by.remove(user)
+        liked = False
+    else:
+        event.liked_by.add(user)
+        liked = True
+
+    event.save()
+
+    return Response({'message': 'Like updated', 'liked': liked, 'event_id': event.id})
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer

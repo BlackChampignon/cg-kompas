@@ -3,15 +3,15 @@ from .models import Event, User, Category, Comment
 
 
 class UserSerializer(serializers.ModelSerializer):
-    liked_events = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True,
-        source='liked_events'  # Uses the reverse relationship from `Event.liked_by`
-    )
+    # liked_events = serializers.PrimaryKeyRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     source='liked_events'  # Uses the reverse relationship from `Event.liked_by`
+    # )
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'liked_events']
+        fields = ['username', 'email']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -21,6 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    liked = serializers.SerializerMethodField()
     first_category = serializers.SerializerMethodField()
     latitude = serializers.SerializerMethodField()
     longitude = serializers.SerializerMethodField()
@@ -30,13 +31,14 @@ class EventSerializer(serializers.ModelSerializer):
         read_only=True
     )  # Users who liked this event
     image = serializers.ImageField(required=False, allow_null=True)
+    id = serializers.CharField()
 
     class Meta:
         model = Event
         fields = [
             'id', 'name', 'description', 'region', 'precise_place',
             'latitude', 'longitude', 'date', 'repetition', 'duration',
-            'first_category', 'price', 'liked_by', 'image', 'theme_color'
+            'first_category', 'price', 'liked', 'liked_by', 'image', 'theme_color'
         ]
 
     def get_first_category(self, obj):
@@ -64,6 +66,12 @@ class EventSerializer(serializers.ModelSerializer):
             except (ValueError, IndexError):
                 return None
         return None
+
+    def get_liked(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            return obj.liked_by.filter(id=user.id).exists()
+        return False
 
 
 class CommentSerializer(serializers.ModelSerializer):
