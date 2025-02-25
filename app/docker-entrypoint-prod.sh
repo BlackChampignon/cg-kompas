@@ -18,4 +18,4 @@ echo "Starting server"
 
 # Change the --forwarded-allow-ips parameter to the actual IP address of the reverse proxy server
 # or ensure that gunicorn is only accessible from the reverse proxy server
-/usr/local/bin/gunicorn sams.wsgi:application --workers 2 --forwarded-allow-ips="*" --bind :8000
+/usr/local/bin/gunicorn config.wsgi:application --workers 2 --forwarded-allow-ips="*" --bind :8000
