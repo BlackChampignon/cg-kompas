@@ -126,6 +126,7 @@ def api_get_event(request, event_id):
 @permission_classes([IsAuthenticated])
 def api_events(request):
     events = Event.objects.all()
+    events.sort(key=lambda x: x["date"])
     serializer = EventSerializer(events, many=True, context={'request': request})
     return Response(serializer.data)
 
