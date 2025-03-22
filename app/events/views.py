@@ -125,8 +125,7 @@ def api_get_event(request, event_id):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def api_events(request):
-    events = Event.objects.all()
-    events.sort(key=lambda x: x["date"])
+    events = Event.objects.all().order_by("date")
     serializer = EventSerializer(events, many=True, context={'request': request})
     return Response(serializer.data)
 
